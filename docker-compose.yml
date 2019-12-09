@@ -1,0 +1,121 @@
+#
+# NEXTCLOUD WITH POSTGRESQL LETSENCRYPT COLLABORA CRON-SUPPORT
+# https://github.com/bentolor/docker-nextcloud-collabora-postgresql-letsencrypt
+#
+#
+# INITIAL SETUP
+#   1. register get two dynamic domains i.e. at https://freedns.org
+#        - one for your nextcloud:     mynextcloud.mooo.com
+#        - one only to host Collabora:    myoffice.mooo.com
+#   2. publicy expose TCP port 80 & 443 of your host in router
+#   3. Adjust all [##VALUES##] in the files: docker-compose.yml and db.env
+#   4. Run `sudo docker-compose up --build`
+#   5. Activate Collabora pluing in nextcloud &
+#      configure https://[##myoffice.mooo.com##] as URL
+#
+# UPGRADE/REBUILD
+#   sudo docker-compose down
+#   sudo docker-compose build --pull
+#   sudo docker-compose up -d
+#
+version: '3'
+
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    volumes:
+      - nextcloud-db:/var/lib/postgresql/data
+    env_file:
+      - db.env
+
+  app:
+    build: ./nextcloud-cron
+    restart: always
+    volumes:
+      - nextcloud-data:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - VIRTUAL_HOST=[##mynextcloud.mooo.com##]
+      - LETSENCRYPT_HOST=[##mynextcloud.mooo.com##]
+      - LETSENCRYPT_EMAIL=[##A REACHABLE EMAIL ADRESS##]
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=nextcloud
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=[##GENERATED PASSWORD##]
+      #- SMTP_HOST=
+      #- SMTP_SECURE=tls
+      #- SMTP_PORT=587
+      #- SMTP_NAME=xxx
+      #- SMTP_PASSWORD=xxx
+      #- MAIL_FROM_ADDRESS=xxx
+      #- MAIL_DOMAIN=xxx
+    env_file:
+      - db.env
+    depends_on:
+      - db
+    networks:
+      - nextcloud-proxy-tier
+      - default
+
+  proxy:
+    build: ./proxy
+    restart: always
+    ports:
+      - 7080:80
+      - 7443:443
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    volumes:
+      - nextcloud-proxy-certs:/etc/nginx/certs:ro
+      - nextcloud-proxy-vhost.d:/etc/nginx/vhost.d
+      - nextcloud-proxy-html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - nextcloud-proxy-tier
+
+  letsencrypt-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - nextcloud-proxy-certs:/etc/nginx/certs
+      - nextcloud-proxy-vhost.d:/etc/nginx/vhost.d
+      - nextcloud-proxy-html:/usr/share/nginx/html
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - nextcloud-proxy-tier
+    depends_on:
+      - proxy
+
+  collabora:
+    image: collabora/code
+    networks:
+      - nextcloud-proxy-tier
+    depends_on:
+      - proxy
+    cap_add:
+     - MKNOD
+    ports:
+      - 127.0.0.1:9980:9980
+    environment:
+      # IMPORTANT: Note the backslashs before the dots here (and only here)!
+      - domain=[##mynextcloud\.mooo\.com##]
+      - username=admin
+      - password=[##A SECURE GENERATED PASSWORD##]
+      - VIRTUAL_HOST=[##myoffice.mooo.com##]
+      - VIRTUAL_NETWORK=nextcloud-proxy-tier
+      - VIRTUAL_PORT=9980
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true
+      - LETSENCRYPT_HOST=[##myoffice.mooo.com##]
+    restart: unless-stopped
+
+volumes:
+  nextcloud-db:
+  nextcloud-data:
+  nextcloud-proxy-certs:
+  nextcloud-proxy-vhost.d:
+  nextcloud-proxy-html:
+
+networks:
+  nextcloud-proxy-tier:

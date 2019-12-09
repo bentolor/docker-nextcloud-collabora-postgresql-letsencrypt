@@ -1,0 +1,37 @@
+= NextCloud on Docker with LetsEcnrypt SSL, PostgreSQL backend, Collabora online myoffice, Cron-Support
+
+After in my perception the official examples did not provide a working Docker example to host a NextCloud in production environment, this is my try.
+
+## Features
+
+* Based on link:https://github.com/nextcloud/docker/blob/master/.examples/docker-compose/with-nginx-proxy/postgres/apache/docker-compose.yml[NextCloud PostgreSQL Apache example]
+* link:https://github.com/nextcloud/docker/blob/master/.examples/dockerfiles/cron/apache/supervisord.conf[Cron-based background Tasks using supervisord]
+* Letsencrypt support
+* [Collabora Online myoffice (CODE) integration](https://github.com/nextcloud/docker/pull/630)
+
+## How to get it running
+
+To get this running, have an installed `docker-compose` available and:
+
+1. register get two dynamic domains i.e. at https://freedns.org
+- one for your nextcloud: `mynextcloud.mooo.com`
+- one only to host Collabora: `myoffice.mooo.com`
+2. publicy expose TCP port 80 & 443 of your host in router
+3. Adjust all `pass:[[##VALUES##]]` in the files: `docker-compose.yml` and `db.env`
+4. Run `sudo docker-compose up --build`
+5. Activate Collabora pluing in nextcloud & define pass:[https://[##myoffice.mooo.com##]] as URL
+
+## How to upgrade & rebuild your installation
+Simply do the following. Due to the Docker volumes this will retain all your data and even your running login sessions.
+
+```
+   $ sudo docker-compose down
+   $ sudo docker-compose build --pull
+   $ sudo docker-compose up -d
+```
+
+
+## Versions
+2019-11-01::  Initial running version
+2019-12-09::  Got Collabora CODE Integration working
+
