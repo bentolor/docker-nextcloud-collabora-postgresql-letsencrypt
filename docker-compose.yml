@@ -90,6 +90,7 @@ services:
 
   collabora:
     image: collabora/code
+    restart: always
     networks:
       - nextcloud-proxy-tier
     depends_on:
@@ -108,7 +109,6 @@ services:
       - VIRTUAL_PORT=9980
       - extra_params=--o:ssl.enable=false --o:ssl.termination=true
       - LETSENCRYPT_HOST=[##myoffice.mooo.com##]
-    restart: unless-stopped
 
 volumes:
   nextcloud-db:
