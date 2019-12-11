@@ -23,7 +23,7 @@ To get this running, have an installed `docker-compose` available and:
 2. publicly expose TCP port 80 & 443 of your host in router
 3. Adjust all `pass:[[##VALUES##]]` in the files: `docker-compose.yml` and `db.env`
 4. Run `sudo docker-compose up --build`. I added/adjusted my `/etc/docker/daemon.js` to define a custom data storage location: `{ "data-root": "/srv/dockerdata" }`
-5. Activate Collabora pluing in Nextcloud und define pass:[https://[##myoffice.mooo.com##]] as URL. Ignore the _Saved with error: Collabora Online should use the same protocol as the server installation_ message.
+5. Activate Collabora plugin in NextCloud und define pass:[https://[##myoffice.mooo.com##]] as URL. Ignore the _Saved with error: Collabora Online should use the same protocol as the server installation_ message.
 
 
 
