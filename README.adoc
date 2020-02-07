@@ -22,10 +22,10 @@ To get this running, have an installed `docker-compose` available and:
 - one only to host Collabora: `myoffice.mooo.com`
 2. publicly expose TCP port 80 & 443 of your host in router
 3. Adjust all `pass:[[##VALUES##]]` in the files: `docker-compose.yml` and `db.env`
-4. Run `sudo docker-compose up --build`. I added/adjusted my `/etc/docker/daemon.js` to define a custom data storage location: `{ "data-root": "/srv/dockerdata" }`
-5. Activate Collabora plugin in NextCloud und define pass:[https://[##myoffice.mooo.com##]] as URL. Ignore the _Saved with error: Collabora Online should use the same protocol as the server installation_ message.
-
-
+4. _Optional:_ I added/adjusted my `/etc/docker/daemon.js` to define a custom data storage location: `{ "data-root": "/srv/dockerdata" }` and restarted the docker daemon
+5. Run `sudo docker-compose up --build`
+6. Activate Collabora plugin in NextCloud und define pass:[https://[##myoffice.mooo.com##]] as URL. Ignore the _Saved with error: Collabora Online should use the same protocol as the server installation_ message.
+7. For now and https://github.com/nextcloud/docker/pull/819[until the merge request #819] is merged into upstream you need to run `sudo docker-compose exec --user www-data app php occ config:system:set overwriteprotocol --value="https"` once or you will have problems to login i.e. via the Android app as described in my https://github.com/nextcloud/android/issues/4786[ticket for the Android app] 
 
 ## How to upgrade & rebuild your installation
 Simply do the following. Due to the persistent Docker volumes this will retain all your data and even your running login sessions.
@@ -39,5 +39,7 @@ Simply do the following. Due to the persistent Docker volumes this will retain a
 I'm not sure, but after major release upgrade a subsequent `sudo docker-compose exec --user www-data app php occ db:add-missing-indices` might be necessary or not. At least it won't hurt.
 
 ## Versions
-2019-11-01::  Initial running version
+
+2020-02-07::  Fix access issues using the Android app due to missing `overwriteprotocol` setting to `https`
 2019-12-09::  Got Collabora CODE Integration working
+2019-11-01::  Initial running version
