@@ -22,7 +22,7 @@ version: '3'
 
 services:
   db:
-    image: postgres:alpine
+    image: postgres:12-alpine
     restart: always
     volumes:
       - nextcloud-db:/var/lib/postgresql/data
