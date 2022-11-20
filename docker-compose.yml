@@ -90,9 +90,9 @@ services:
     environment:
       - NGINX_PROXY_CONTAINER=proxy
       - DEFAULT_EMAIL=[##A REACHABLE EMAIL ADRESS##]
-      # Uncomment following for testing and use ACME Staging environment
-      # Production certification issue rate is limited to 5 every some weeks
-      #- ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory
+      # Production certification issue rate is limited to 5 certificate issues in some timeframe
+      # Uncomment the following to test your deployments safely. The browser will warn on the SSL certificates.
+      #- LETSENCRYPT_TEST=true
     networks:
       - proxy-tier
     depends_on:
