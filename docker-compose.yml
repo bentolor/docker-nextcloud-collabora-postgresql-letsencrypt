@@ -23,6 +23,7 @@ version: '3'
 services:
   db:
     image: postgres:12-alpine
+    container_name: nextcloud-db
     restart: always
     volumes:
       - nextcloud-db:/var/lib/postgresql/data
@@ -31,6 +32,7 @@ services:
 
   app:
     build: ./nextcloud-cron
+    container_name: nextcloud
     restart: always
     volumes:
       - nextcloud-data:/var/www/html
@@ -56,11 +58,13 @@ services:
     depends_on:
       - db
     networks:
-      - nextcloud-proxy-tier
+      - proxy-tier
       - default
+      # DB is on default network; remaining on proxy-tier
 
   proxy:
     build: ./proxy
+    container_name: proxy
     restart: always
     ports:
       - 7080:80
@@ -68,32 +72,34 @@ services:
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     volumes:
-      - nextcloud-proxy-certs:/etc/nginx/certs:ro
-      - nextcloud-proxy-vhost.d:/etc/nginx/vhost.d
-      - nextcloud-proxy-html:/usr/share/nginx/html
+      - proxy-certs:/etc/nginx/certs:ro
+      - proxy-vhost.d:/etc/nginx/vhost.d
+      - proxy-html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
-      - nextcloud-proxy-tier
+      - proxy-tier
 
   letsencrypt-companion:
     image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
     restart: always
     volumes:
-      - nextcloud-proxy-certs:/etc/nginx/certs
-      - nextcloud-proxy-vhost.d:/etc/nginx/vhost.d
-      - nextcloud-proxy-html:/usr/share/nginx/html
+      - proxy-certs:/etc/nginx/certs
+      - proxy-vhost.d:/etc/nginx/vhost.d
+      - proxy-html:/usr/share/nginx/html
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - nextcloud-proxy-tier
+      - proxy-tier
     depends_on:
       - proxy
 
   collabora:
     image: collabora/code
+    container_name: collabora
     restart: always
     networks:
-      - nextcloud-proxy-tier
+      - proxy-tier
     depends_on:
       - proxy
     cap_add:
@@ -106,7 +112,7 @@ services:
       - username=admin
       - password=[##A SECURE GENERATED PASSWORD##]
       - VIRTUAL_HOST=[##myoffice.mooo.com##]
-      - VIRTUAL_NETWORK=nextcloud-proxy-tier
+      - VIRTUAL_NETWORK=proxy-tier
       - VIRTUAL_PORT=9980
       - extra_params=--o:ssl.enable=false --o:ssl.termination=true
       - LETSENCRYPT_HOST=[##myoffice.mooo.com##]
@@ -114,9 +120,9 @@ services:
 volumes:
   nextcloud-db:
   nextcloud-data:
-  nextcloud-proxy-certs:
-  nextcloud-proxy-vhost.d:
-  nextcloud-proxy-html:
+  proxy-certs:
+  proxy-vhost.d:
+  proxy-html:
 
 networks:
-  nextcloud-proxy-tier:
+  proxy-tier:
