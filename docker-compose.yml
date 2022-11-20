@@ -68,8 +68,6 @@ services:
     ports:
       - 7080:80
       - 7443:443
-    labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     volumes:
       - proxy-certs:/etc/nginx/certs:ro
       - proxy-vhost.d:/etc/nginx/vhost.d
@@ -79,7 +77,7 @@ services:
       - proxy-tier
 
   letsencrypt-companion:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+    image: nginxproxy/acme-companion
     container_name: letsencrypt
     restart: always
     volumes:
@@ -90,6 +88,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt:/etc/acme.sh
     environment:
+      - NGINX_PROXY_CONTAINER=proxy
       - DEFAULT_EMAIL=[##A REACHABLE EMAIL ADRESS##]
       # Uncomment following for testing and use ACME Staging environment
       # Production certification issue rate is limited to 5 every some weeks
