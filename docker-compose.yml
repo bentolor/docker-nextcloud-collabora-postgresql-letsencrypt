@@ -65,6 +65,8 @@ services:
     build: ./proxy
     container_name: proxy
     restart: always
+    environment:
+      - DISABLE_ACCESS_LOGS=1
     ports:
       - 7080:80
       - 7443:443
