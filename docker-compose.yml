@@ -40,7 +40,6 @@ services:
     environment:
       - VIRTUAL_HOST=[##mynextcloud.mooo.com##]
       - LETSENCRYPT_HOST=[##mynextcloud.mooo.com##]
-      - LETSENCRYPT_EMAIL=[##A REACHABLE EMAIL ADRESS##]
       - POSTGRES_HOST=db
       - POSTGRES_DB=nextcloud
       - NEXTCLOUD_OVERWRITEPROTOCOL=https
@@ -89,6 +88,12 @@ services:
       - proxy-html:/usr/share/nginx/html
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=[##A REACHABLE EMAIL ADRESS##]
+      # Uncomment following for testing and use ACME Staging environment
+      # Production certification issue rate is limited to 5 every some weeks
+      #- ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory
     networks:
       - proxy-tier
     depends_on:
@@ -112,10 +117,10 @@ services:
       - username=admin
       - password=[##A SECURE GENERATED PASSWORD##]
       - VIRTUAL_HOST=[##myoffice.mooo.com##]
+      - LETSENCRYPT_HOST=[##myoffice.mooo.com##]
       - VIRTUAL_NETWORK=proxy-tier
       - VIRTUAL_PORT=9980
       - extra_params=--o:ssl.enable=false --o:ssl.termination=true
-      - LETSENCRYPT_HOST=[##myoffice.mooo.com##]
 
 volumes:
   nextcloud-db:
@@ -123,6 +128,8 @@ volumes:
   proxy-certs:
   proxy-vhost.d:
   proxy-html:
+  letsencrypt:
+
 
 networks:
   proxy-tier:
