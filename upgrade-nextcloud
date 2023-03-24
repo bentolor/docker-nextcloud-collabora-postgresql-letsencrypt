@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+echo "::: Pulling updates"
+sudo docker-compose pull  --include-deps 
+echo "::: Pulling Apache"
+sudo docker pull nextcloud:apache 
+echo "::: Rebuilding images"
+sudo docker-compose build --pull
+echo "::: Shutting down"
+sudo docker-compose down 
+echo "::: Rebuilding & starting images"
+sudo docker-compose up -d
+echo "::: Pruning unused images, networks & containers"
+echo "    Disabled for safety: Uncomment if you understand the implications"
+echo "    and would like to run `sudo docker system prune -a -f`"
+#sudo docker system prune -a -f
+echo "::: Done."

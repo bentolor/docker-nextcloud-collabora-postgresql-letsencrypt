@@ -37,10 +37,11 @@ Simply do the following. Due to the persistent Docker volumes this will retain a
    $ sudo docker-compose up -d
 ```
 
-I'm not sure, but after major release upgrade a subsequent `sudo docker-compose exec --user www-data app php occ db:add-missing-indices` might be necessary or not. At least it won't hurt.
+I'm not sure, but after major release upgrade a subsequent `sudo docker-compose exec --user www-data app php occ db:add-missing-indices` might be necessary or not. At least it won't hurt. I also provided a `upgrade-nextcloud` shell script I'm using for convenience.
 
 ## Versions
 
+2023-03-24::  Provide `upgrade-nextcloud` as template for a convenient upgrade script.
 2020-02-07::  Fix access issues using the Android app due to missing `overwriteprotocol` setting to `https`
 2019-12-09::  Got Collabora CODE Integration working
 2019-11-01::  Initial running version
